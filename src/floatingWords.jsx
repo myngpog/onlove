@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react';
 
 function getSafeRandom(min = 0, max = 100, excludedMin = 40, excludedMax = 60) {
     const rand = Math.random() * (max - min) + min;
@@ -32,26 +32,32 @@ function isTooClose(newX, newY, zones, threshold = 10) {
 
 function FloatingWords({ newEntry }) {
     console.log("NEW ENTRY:", newEntry);
-    const [allDefinitions, setAllDefinitions] = useState([
-        "a quiet moment.",
-        "remembering their coffee order.",
-        "letting go.",
-        "showing up.",
-        "absence made bearable.",
-        "a connection between many individuals where each side shares a part of themselves over time.",
-        "being seen.",
-        "love involves each individual going out of their way to understand the other side.",
-        "warm silence.",
-        "a commitment to be integrated into one another’s lives.",
-        "just is.",
-        "baby don't hurt me don't hurt me no more",
-        ]);
-
+    const [allDefinitions, setAllDefinitions] = useState([]);
     const [usedZones, setUsedZones] = useState([]);
     const [activeDefs, setActiveDefs] = useState([])
+    const shownEntries = useRef(new Set());
+
+
+    //  fetch from DB
+    useEffect(() => {
+      const fetchDefs = async () => {
+        try {
+          const res = await fetch('http://localhost:3001/api/getDefinitions');
+          const data = await res.json();
+          const texts = data.map(d => d.text);
+          setAllDefinitions(texts);
+          console.log('✅ Loaded definitions:', texts);
+        } catch (err) {
+          console.error("Failed to fetch definitions from DB", err);
+        }
+      };
+    
+      fetchDefs();
+    }, []);
+    
 
     useEffect(() => {
-        if (newEntry && newEntry.trim()) {
+        if (newEntry && newEntry.trim() && !shownEntries.current.has(newEntry)) {
           const text = newEntry.trim();
           const id = `${Date.now()}-${Math.random()}`;
           const { x, y } = getSafePosition(usedZones);

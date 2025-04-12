@@ -9,13 +9,25 @@ function Home() {
   const [inputValue, setInputValue] = useState("")
   const [newDefinition, setNewDefinition] = useState("")
 
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    if (inputValue.trim()) {
-      setNewDefinition(inputValue.trim())
-      setInputValue("") 
+  const handleSubmit = async (e) => {
+    e.preventDefault(); 
+
+    const trimmed = inputValue.trim();
+    if (trimmed) {
+      try {
+        await fetch('http://localhost:3001/api/addDefinitions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: trimmed }),
+        });
+
+        setNewDefinition(trimmed);
+        setInputValue("");
+      } catch (err) {
+        console.error("Error submitting definition:", err);
+      }
     }
-  }
+  };
 
   return (
     <>
