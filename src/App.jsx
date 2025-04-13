@@ -11,11 +11,18 @@ function containsSlur(text) {
 }
 
 function Home() {
+  const [isCooldown, setIsCooldown] = useState(false);
+  const [cooldownTimeLeft, setCooldownTimeLeft] = useState(0);
   const [inputValue, setInputValue] = useState("")
   const [newDefinition, setNewDefinition] = useState("")
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+  
+    if (isCooldown) {
+      alert(`maybe take some time to read :)`);
+      return;
+    }
   
     const trimmed = inputValue.trim();
     if (!trimmed) return;
@@ -34,11 +41,24 @@ function Home() {
   
       setNewDefinition(trimmed);
       setInputValue('');
+  
+      setIsCooldown(true);
+      setCooldownTimeLeft(120);
+  
+      const interval = setInterval(() => {
+        setCooldownTimeLeft((prev) => {
+          if (prev <= 1) {
+            clearInterval(interval);
+            setIsCooldown(false);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
     } catch (err) {
       console.error("Error submitting definition:", err);
     }
   };
-
   return (
     <>
       <FloatingWords newEntry={newDefinition} />
@@ -50,13 +70,18 @@ function Home() {
       <div className="container">
         <h1 className="title">What is love?</h1>
         <form onSubmit={handleSubmit}>
-          <input
-            className="input-line"
-            type="text"
-            placeholder="in its purest, rawest form"
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-          />
+        <input
+          className="input-line"
+          type="text"
+          placeholder={
+            isCooldown
+              ? `take some time to read :)`
+              : "in its purest, rawest form"
+          }
+          value={inputValue}
+          onChange={(e) => setInputValue(e.target.value)}
+          disabled={isCooldown}
+        />
         </form>
       </div>
     </>
