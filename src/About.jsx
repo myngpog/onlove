@@ -5,7 +5,7 @@ function About() {
     return (
     <>
     <header className="header">
-        <Link to="/" className="about">go back</Link>
+        <Link to="/" className="about">back</Link>
     </header>
     <div>
         <p className="about-text">
